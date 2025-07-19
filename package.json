@@ -13,7 +13,7 @@
     "lint:fix": "pnpm run -r lint:fix",
     "tsc": "pnpm run -r tsc",
     "prettier:write": "prettier --write ./packages/*/src",
-    "preview": "vite preview",
+    "preview": "pnpm -F @hanghae-plus/shopping preview",
     "test": "pnpm -F @hanghae-plus/lib test",
     "test:basic": "pnpm -F @hanghae-plus/lib test:basic",
     "test:advanced": "pnpm -F @hanghae-plus/lib test:advanced",
