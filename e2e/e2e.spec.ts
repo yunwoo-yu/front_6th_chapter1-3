@@ -1,4 +1,5 @@
-import { expect, test, Page } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
+import { clearSpyCalls, getSpyCalls } from "./sypHelpers";
 
 declare global {
   interface Window {
@@ -432,7 +433,7 @@ test.describe("E2E: 쇼핑몰 전체 사용자 시나리오", () => {
       await page.locator(".quantity-increase-btn").first().click();
 
       // 총 금액 업데이트 확인
-      await expect(page.locator("#root")).toMatchAriaSnapshot(`
+      await expect(page.locator("body")).toMatchAriaSnapshot(`
     - text: /총 금액 670원/
     - button "전체 비우기"
     - button "구매하기"
@@ -635,6 +636,72 @@ test.describe("E2E: 쇼핑몰 전체 사용자 시나리오", () => {
     - link "홈으로":
       - /url: /
     `);
+    });
+  });
+
+  test.describe("9. 모달과 토스트의 리렌더링 방지 테스트", () => {
+    test("장바구니를 추가하거나 삭제했을 때, 토스트 호출로 인하여 리렌더링이 되지 않도록 한다", async ({ page }) => {
+      const helpers = new E2EHelpers(page);
+      const getCalls = async () => await getSpyCalls(page);
+      const clearCalls = async () => await clearSpyCalls(page);
+
+      await helpers.waitForPageLoad();
+      await clearCalls();
+
+      // 상품을 장바구니에 추가
+      await helpers.addProductToCart("PVC 투명 젤리 쇼핑백");
+      await expect(page.locator("text=장바구니에 추가되었습니다")).toBeVisible();
+      await helpers.addProductToCart("샷시 풍지판 창문 바람막이 ");
+      await expect(page.locator("text=장바구니에 추가되었습니다")).toBeVisible();
+
+      await expect(page.getByRole("banner")).toMatchAriaSnapshot(`
+    - heading "쇼핑몰" [level=1]:
+      - link "쇼핑몰":
+        - /url: /
+    - button "장바구니 2":
+      - img "장바구니"
+    `);
+
+      expect(await getCalls()).toEqual([]);
+      await page.getByRole("button", { name: "닫기" }).click();
+
+      // 상품 상세 페이지로 이동
+      const productCard = page
+        .locator("text=PVC 투명 젤리 쇼핑백")
+        .locator('xpath=ancestor::*[contains(@class, "product-card")]');
+      await productCard.locator("img").click();
+      await expect(page).toHaveURL("/product/85067212996");
+      await expect(
+        page.locator('h1:text("PVC 투명 젤리 쇼핑백 1호 와인 답례품 구디백 비닐 손잡이 미니 간식 선물포장")'),
+      ).toBeVisible();
+
+      expect(await getCalls()).toEqual([["ProductDetail: 85067212996"]]);
+
+      await expect(page.locator("text=관련 상품")).toBeVisible();
+      expect(await getCalls()).toEqual([["ProductDetail: 85067212996"], ["ProductDetail: 85067212996"]]);
+
+      await page.click("#add-to-cart-btn");
+      await expect(page.locator("text=장바구니에 추가되었습니다")).toBeVisible();
+
+      expect(await getCalls()).toEqual([["ProductDetail: 85067212996"], ["ProductDetail: 85067212996"]]);
+
+      await page.getByRole("button", { name: "장바구니 2" }).click();
+
+      // 첫 번째 상품만 선택
+      await page.locator(".cart-item-checkbox").first().check();
+
+      // 선택 삭제
+      await page.click("#cart-modal-remove-selected-btn");
+      await expect(page.locator("text=선택된 상품들이 삭제되었습니다")).toBeVisible();
+
+      // 장바구니 비우기
+      await page.click("#cart-modal-clear-cart-btn");
+      await expect(page.locator("text=장바구니가 비워졌습니다")).toBeVisible();
+
+      // 장바구니가 비어있는지 확인
+      await expect(page.locator("text=장바구니가 비어있습니다")).toBeVisible();
+
+      expect(await getCalls()).toEqual([["ProductDetail: 85067212996"], ["ProductDetail: 85067212996"]]);
     });
   });
 });

@@ -10,12 +10,13 @@
   "scripts": {
     "dev": "pnpm -F @hanghae-plus/shopping dev",
     "build": "pnpm run -r build",
-    "lint:fix": "eslint --fix",
+    "lint:fix": "pnpm run -r lint:fix",
+    "tsc": "pnpm run -r tsc",
     "prettier:write": "prettier --write ./packages/*/src",
     "preview": "vite preview",
-    "test": "pnpm -F @hanghae-plus/react test",
-    "test:basic": "pnpm -F @hanghae-plus/react test:basic",
-    "test:advanced": "pnpm -F @hanghae-plus/react test:advanced",
+    "test": "pnpm -F @hanghae-plus/lib test",
+    "test:basic": "pnpm -F @hanghae-plus/lib test:basic",
+    "test:advanced": "pnpm -F @hanghae-plus/lib test:advanced",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:report": "npx playwright show-report",
@@ -25,8 +26,7 @@
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
-      "prettier --write",
-      "eslint --fix"
+      "prettier --write"
     ]
   },
   "devDependencies": {
@@ -38,7 +38,6 @@
     "@testing-library/jest-dom": "latest",
     "@testing-library/user-event": "latest",
     "@types/node": "^24.0.13",
-    "@vitejs/plugin-react": "latest",
     "@vitest/coverage-v8": "latest",
     "@vitest/ui": "latest",
     "eslint": "^9.16.0",

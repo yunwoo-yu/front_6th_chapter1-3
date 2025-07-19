@@ -1,5 +1,5 @@
-import { defineConfig as defineTestConfig, mergeConfig, ViteUserConfig } from "vitest/config";
-import { defineConfig, UserConfig } from "vite";
+import { defineConfig as defineTestConfig, mergeConfig, type ViteUserConfig } from "vitest/config";
+import { defineConfig, type UserConfig } from "vite";
 
 export function createViteConfig(options: UserConfig = {}, testOptions: ViteUserConfig["test"] = {}): UserConfig {
   return mergeConfig(
@@ -8,7 +8,7 @@ export function createViteConfig(options: UserConfig = {}, testOptions: ViteUser
       test: {
         globals: true,
         environment: "jsdom",
-        exclude: ["**/e2e/**", "**/*.e2e.spec.js", "**/node_modules/**"],
+        exclude: ["**/e2e/**", "**/*.e2e.spec.ts", "**/node_modules/**"],
         ...testOptions,
       },
     }),
