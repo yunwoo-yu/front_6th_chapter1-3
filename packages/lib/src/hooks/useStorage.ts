@@ -10,6 +10,5 @@ export const useStorage = <T>(storage: Storage<T>) => {
   return useSyncExternalStore(
     (onStoreChange) => storage.subscribe(onStoreChange),
     () => storage.get(),
-    () => storage.get(),
   );
 };
